@@ -1,6 +1,7 @@
 import ActionsPCK.BrowserAction;
 import Pom.Login;
 
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -10,10 +11,10 @@ public class LoginTest {
         BrowserAction.setWebDriverToThreadLocalOfDrivers(BrowserAction.Browsers.chrome);
     }
 
-   /* @AfterMethod
+    @AfterMethod
     void teardown() {
         BrowserAction.closeDriver();
-    }*/
+    }
 
     @Test
     void loggingAsStandardUser() {

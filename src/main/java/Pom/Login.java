@@ -29,7 +29,14 @@ public class Login {
     }
 
     public void clickLogin(String expectedSelector){
-        uiActions.clickOn(LoginBtn, UiActions.Locators.id,true,expectedSelector, UiActions.Locators.XPath);
+        try {
+            uiActions.clickOn(LoginBtn, UiActions.Locators.id,true,expectedSelector, UiActions.Locators.XPath);
+        }
+        catch (Exception e) {
+            System.out.println("Error occurred while clicking on login button: " + e.getMessage());
+            System.out.println(uiActions.getElementText(erroSelector, UiActions.Locators.XPath));
+
+        }
     }
 
     public void validLogin(String username, String password){

@@ -160,6 +160,12 @@ public class UiActions {
         WebElement element = driver.findElement(b);
         return element.getText();
     }
+    public void acceptAlert(){
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(20));
+        wait.until(ExpectedConditions.alertIsPresent());
+        Alert alert = driver.switchTo().alert();
+        alert.accept();
+    }
 
     public enum Locators {
         XPath,
