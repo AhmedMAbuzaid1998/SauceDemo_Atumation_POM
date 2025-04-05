@@ -17,7 +17,7 @@ public class UiActions {
     public WebDriver driver;
 
     public UiActions() {
-        this.driver = BrowserAction.drivers.get();
+        this.driver = BrowserAction.getDriver();
     }
 
     public void clickOn(String selector, Locators l, boolean assertion, String expectedElementSelector, Locators l2) {
@@ -25,51 +25,67 @@ public class UiActions {
         waitUntil(b, ExpectedConditionsEnum.presenceOfElement);
         WebElement element = driver.findElement(b);
 
-        try {
-            if (assertion) {
-                waitUntil(b, ExpectedConditionsEnum.ElementToBeClickable);
-            }
-            // Try single click
-            element.click();
-        } catch (Exception e1) {
-            try {
-                // Try double click
-                Actions actions = new Actions(driver);
-                actions.doubleClick(element).perform();
-            } catch (Exception e2) {
-                try {
-                    // Try hover then click
-                    Actions actions = new Actions(driver);
-                    actions.moveToElement(element).click().perform();
-                } catch (Exception e3) {
-                    try {
-                        // Try clicking with Enter key
-                        element.sendKeys(Keys.ENTER);
-                    } catch (Exception e4) {
-                        try {
-                            // Try JavaScript click as the last resort
-                            JavascriptExecutor executor = (JavascriptExecutor) driver;
-                            executor.executeScript("arguments[0].click();", element);
-                        } catch (Exception e5) {
-                            Assert.fail("Couldn't click the element due to: " + e5.getMessage());
-                        }
-                    }
-                }
-            }
+        if (assertion) {
+            waitUntil(b, ExpectedConditionsEnum.ElementToBeClickable);
         }
+
+        boolean clicked = tryClick(element) || tryDoubleClick(element) || tryHoverClick(element) || tryEnterKey(element) || tryJSClick(element);
+
+        if (!clicked) {
+            Assert.fail("Couldn't click the element using any method.");
+        }
+
+        waitForPageLoad();
+        assertExpectedElementVisible(expectedElementSelector, l2);
+    }
+
+    private boolean tryClick(WebElement element) {
+        try {
+            element.click();
+            return true;
+        } catch (Exception ignored) { return false; }
+    }
+
+    private boolean tryDoubleClick(WebElement element) {
+        try {
+            new Actions(driver).doubleClick(element).perform();
+            return true;
+        } catch (Exception ignored) { return false; }
+    }
+
+    private boolean tryHoverClick(WebElement element) {
+        try {
+            new Actions(driver).moveToElement(element).click().perform();
+            return true;
+        } catch (Exception ignored) { return false; }
+    }
+
+    private boolean tryEnterKey(WebElement element) {
+        try {
+            element.sendKeys(Keys.ENTER);
+            return true;
+        } catch (Exception ignored) { return false; }
+    }
+
+    private boolean tryJSClick(WebElement element) {
+        try {
+            ((JavascriptExecutor) driver).executeScript("arguments[0].click();", element);
+            return true;
+        } catch (Exception ignored) { return false; }
+    }
+
+    private void waitForPageLoad() {
         new WebDriverWait(driver, Duration.ofSeconds(10)).until(
                 webDriver -> ((JavascriptExecutor) webDriver).executeScript("return document.readyState").equals("complete")
         );
-
-        By expectedElement = returnElementLocatorBy(expectedElementSelector, l2);
-        try {
-            assertNotNull(waitUntil(expectedElement, ExpectedConditionsEnum.ElementToBeClickable));
-        }
-        catch (Exception e) {
-            Assert.fail("Expected element not found after clicking on the element: " + e.getMessage());
-        }
-
     }
+
+    private void assertExpectedElementVisible(String selector, Locators l) {
+        By expectedElement = returnElementLocatorBy(selector, l);
+        assertNotNull(waitUntil(expectedElement, ExpectedConditionsEnum.ElementToBeClickable),
+                "Expected element not found after clicking.");
+    }
+
 
     public void sendText(String selector, Locators l, String text) {
         By b = returnElementLocatorBy(selector, l);
@@ -99,34 +115,17 @@ public class UiActions {
 
     public WebElement waitUntil(By b, ExpectedConditionsEnum condition) {
         try {
-            WebElement element = null;
+            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
             switch (condition) {
                 case presenceOfElement:
-
-                    element = (new WebDriverWait(driver, Duration.ofSeconds(10))).until(ExpectedConditions.presenceOfElementLocated(b));
-                    return element;
-
+                    return wait.until(ExpectedConditions.presenceOfElementLocated(b));
                 case ElementToBeClickable:
-                    element = (new WebDriverWait(driver, Duration.ofSeconds(10))).until(ExpectedConditions.elementToBeClickable(b));
-                    return element;
-
-
+                    return wait.until(ExpectedConditions.elementToBeClickable(b));
                 default:
-                    element = null;
-                    Assert.fail("Wrong condition");
+                    throw new IllegalArgumentException("Invalid condition: " + condition);
             }
-            return element;
-        } catch (Exception e) {
-            //Assert.fail("Couldn't find the element because of " + e.getMessage());
-            return null;
-        }
-    }
-
-    public WebElement waitUntil(By element, ExpectedCondition<WebElement> s) {
-        try {
-            return new WebDriverWait(driver, Duration.ofSeconds(10)).until(s);
-
-        } catch (Exception e) {
+        } catch (TimeoutException e) {
+            Assert.fail("Timeout while waiting for element: " + b.toString());
             return null;
         }
     }

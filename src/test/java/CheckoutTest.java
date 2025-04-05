@@ -23,9 +23,9 @@ public class CheckoutTest {
     void addToCartAsStandardUser() {
         Login home = new Login();
         home.navigateToHome();
-        home.validLogin(home.usernames[0], home.password);
+        home.loginAndVerify(home.usernames[0], home.password, home.productSelector);
         Cart cart = new Cart();
-        cart.addingItemToCart(String.format(cart.cartItem, "29.99"));
+        cart.addingItemToCart("29.99");
         Checkout checkout=new Checkout();
         checkout.goToTheCart();
         checkout.checkoutInformation();

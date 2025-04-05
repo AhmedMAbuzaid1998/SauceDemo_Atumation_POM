@@ -38,13 +38,29 @@ public class Login {
 
         }
     }
-
-    public void validLogin(String username, String password){
+    public void loginAndVerify(String username, String password, String expectedSelector) {
         navigateToHome();
         enterUsername(username);
         enterPassword(password);
-        clickLogin(productSelector);
+        clickLogin(expectedSelector);
     }
 
-
+   public String returnText(String select, Locators locat){
+        if(locat==Locators.XPath)
+        {
+        return uiActions.getElementText(select, UiActions.Locators.XPath);
+   }
+    else if(locat==Locators.id)
+        {
+        return uiActions.getElementText(select, UiActions.Locators.id);
+        }
+    else{
+            return uiActions.getElementText(select, UiActions.Locators.CSS);
+        }
+    }
+    public enum Locators {
+        XPath,
+        CSS,
+        id
+    }
 }

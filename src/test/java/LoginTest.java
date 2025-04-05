@@ -1,6 +1,7 @@
 import ActionsPCK.BrowserAction;
 import Pom.Login;
 
+import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -8,7 +9,7 @@ import org.testng.annotations.Test;
 public class LoginTest {
     @BeforeMethod
     void setup() throws Exception {
-        BrowserAction.setWebDriverToThreadLocalOfDrivers(BrowserAction.Browsers.chrome);
+        BrowserAction.setWebDriverToThreadLocalOfDrivers(BrowserAction.Browsers.firefox);
     }
 
     @AfterMethod
@@ -19,42 +20,34 @@ public class LoginTest {
     @Test
     void loggingAsStandardUser() {
         Login home = new Login();
-        home.navigateToHome();
-            home.enterUsername(home.usernames[0]);
-            home.enterPassword(home.password);
-            home.clickLogin(home.productSelector);
+        home.loginAndVerify(home.usernames[0],home.password,home.productSelector);
+        Assert.assertTrue(home.returnText(home.productSelector,Login.Locators.XPath).contains("Product"),"Login failed or incorrect page loaded.");
     }
     @Test
     void loggingAsLocked_out_user() {
         Login home = new Login();
-        home.navigateToHome();
-        home.enterUsername(home.usernames[1]);
-        home.enterPassword(home.password);
-        home.clickLogin(home.productSelector);
+        home.loginAndVerify(home.usernames[1],home.password,home.erroSelector);
+        Assert.assertTrue(home.returnText(home.erroSelector,Login.Locators.XPath).contains("Epic sadface: "), "Error message is incorrect.");
     }
 
     @Test
     void loggingAsProblem_user() {
         Login home = new Login();
-        home.navigateToHome();
-        home.enterUsername(home.usernames[2]);
-        home.enterPassword(home.password);
-        home.clickLogin(home.productSelector);
+        home.loginAndVerify(home.usernames[2],home.password,home.productSelector);
+        Assert.assertTrue(home.returnText(home.productSelector,Login.Locators.XPath).contains("Product"),"Login failed or incorrect page loaded.");
+
     }
     @Test
     void loggingAsPerformance_glitch_user() {
         Login home = new Login();
-        home.navigateToHome();
-        home.enterUsername(home.usernames[3]);
-        home.enterPassword(home.password);
-        home.clickLogin(home.productSelector);
+        home.loginAndVerify(home.usernames[3],home.password,home.productSelector);
+        Assert.assertTrue(home.returnText(home.productSelector,Login.Locators.XPath).contains("Product"),"Login failed or incorrect page loaded.");
+
     }
     @Test
     void loggingWithInvalidUser() {
         Login home = new Login();
-        home.navigateToHome();
-        home.enterUsername(home.invalidUsername);
-        home.enterPassword(home.password);
-        home.clickLogin(home.erroSelector);
+        home.loginAndVerify(home.invalidUsername,home.password,home.erroSelector);
+        Assert.assertTrue(home.returnText(home.erroSelector,Login.Locators.XPath).contains("Epic sadface"), "Error message is incorrect.");
     }
 }
