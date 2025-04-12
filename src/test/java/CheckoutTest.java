@@ -29,7 +29,7 @@ public class CheckoutTest {
         Checkout checkout=new Checkout();
         checkout.goToTheCart();
         checkout.checkoutInformation();
-        Assert.assertEquals(checkout.compeletTheOrder(),"THANK YOU FOR YOUR ORDER");
+        Assert.assertEquals(checkout.completeTheOrder(),"THANK YOU FOR YOUR ORDER");
 
     }
 }

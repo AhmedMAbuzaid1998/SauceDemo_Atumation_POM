@@ -33,7 +33,7 @@ public class Checkout {
         uiActions.clickOn(confirmOrder, UiActions.Locators.XPath,true,finish, UiActions.Locators.XPath);
 
     }
-    public String compeletTheOrder() {
+    public String completeTheOrder() {
         uiActions.clickOn(finish, UiActions.Locators.XPath,true,compeleteMsg, UiActions.Locators.XPath);
         return uiActions.getElementText(compeleteMsg, UiActions.Locators.XPath);
     }
